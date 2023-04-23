@@ -80,14 +80,34 @@ shark_df["year"] = shark_df["year"].replace("0", "Unknown")
 
 count_Unknown_year = shark_df["year"].value_counts()["Unknown"] #Cuenta los valores Unknown en columna.
 
-#Transformación de datos columnas 4. Columna Type en origen. Cambiar nombre de columna por TypeofAttack. Cambiar Unkowns por str Invalid.
+#Transformación de datos columnas 4. Columna Type en origen. Cambiar nombre de columna por "attacktype". 
 
 #Cambiar nombre de columna
-
+shark_df.rename(columns={"type": "attacktype"}, inplace=True)
+shark_df.columns
 
 #Transformación de datos columnas 5. Columna Country en origen. Cambiar Nulos por Unknown. Transformar unnamed column por SeaOcean. Dejar solo paises y transformar SeaOcean for Unknown.
 
+#Make a list with all countries in the world.
+#Import csv
+countries_df = pd.read_csv("countries.csv")
+#Create a list
+countries_raw = countries_df['Country'].tolist()
+#Quitar ultimo espacio
+countries = [e.strip().upper() for e in countries_raw]
+#Añadir posible nomenclatura de paises a lista
+countries.append("USA")
+#Checkea si valor en columna esta en lista countries
+check_en_countries = shark_df['country'].str.strip().str.upper().str.contains('|'.join(countries))
+#Conteo de paises validos en columna
+conteo_countries = check_en_countries.sum()
+#Cambio de typos o mala escritura del pais por str "Invalid".
+shark_df.loc[~check_en_countries, "country"] = "Invalid"
+#OJO "INVALID" PODRIA SER OCEAN/SEA
+
 #Transformación de datos columnas 6. Columna Area en origen. Cambiar nulos por Unknown. Si hay SeaOcean pasar values a columna SeaOcean. Quitar espacios al principio y final str en value.
+
+
 
 #Transformación de datos columnas 7. Columna Location en origen. dividir en dos y transformar Unnamed 2 por Region, asignar lo que vaya despues de coma a Region, quitar espacios.
 
