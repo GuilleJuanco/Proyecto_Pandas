@@ -27,17 +27,45 @@ limpiar_1
 limpiar_2 = shark_df.drop_duplicates(inplace=True)
 limpiar_2
 
-#Formato consistente en nombre de columnas. Quitar espacios al principio y final (Columna [["Sex ", "Species "]]). Formatear datos int y float a object (Mejor que solo cambiar year por int(0000)). 
+#Formato consistente en nombre de columnas. Quitar espacios al principio y final (Columna [["Sex ", "Species "]]). Formatear datos float a object. 
 
-#Transformación de datos columnas X. Criterio: Cambiar nulos por str menos en COLUMNA YEAR donde el data type es float para poder operar. Siguiente paso cambiar nulos columna year por int(0000), y el resto de nulos del DF por String "Unknown" o "Invalid", aplicar casos especiales.
+#Cambio de nombre de columnas en origen por todo minúscula sin espacios.
+shark_df.columns = shark_df.columns.str.lower().str.replace(' ', '')
+shark_df.columns
 
-#Transformación de datos columnas 1. Columna Case Number en origen. Eliminar por duplicados cuando x columnas coinciden. Cambiar columna entera por indice.
+# Cambio el tipo de dato de las columnas year y originalorder a string.
+shark_df[['year', 'originalorder']] = shark_df[['year', 'originalorder']].astype(str)
+
+shark_df[["year", "originalorder"]].sample(10)
+
+#Cambiar todos los nulos por "Unknown" en el DataFrame.
+shark_df.fillna(value="Unknown", inplace=True)
+
+#Check for nulls and nan in the dataframe.
+check_nulls = shark_df.isnull().sum()
+check_nans = shark_df.isna().sum()
+
+#Transformación de datos columnas 1. Columna Case Number en origen. Cambiar columna entera a indice.
+# Cambia valores en columna casenumber por indice. 
+shark_df["casenumber"] = range(1, len(shark_df) + 1)
+# Establece columna casenumber como indice.
+shark_df.set_index("casenumber", inplace=True)
 
 #Transformación de datos columnas 2. Columna Date en origen. Cambiar tipo formato por fecha y las que no valen por "Incomplete date"
+#Cambiar dtype: Object a dtype: datetime64[ns] y aislar los valores que tengan un formato diferente.
+shark_df["date"] = pd.to_datetime(shark_df["date"], errors="coerce")
+conteo_nat = shark_df["date"].isna().sum() #844 valores que voy a convertir en "Invalid"
+#Cambiar Valores NaT por la string Invalid.
+shark_df["date"] = shark_df["date"].fillna("Invalid")
+conteo_invalid = shark_df["date"].value_counts()["Invalid"]
+#Quitar ceros de datetime.
+shark_df.loc[shark_df["date"] != "Invalid", "date"] = shark_df.loc[shark_df["date"] != "Invalid", "date"].apply(lambda x: x.strftime("%Y-%m-%d"))
 
-#Transformación de datos columnas 3. Columna Year en origen. Comprobar que coincide con año en columna Date. Cambiar formato a Integer 8 o 16. Cambiar Nulos por cuatro 0 seguidos. 
+#Transformación de datos columnas 3. Columna Year en origen. Eliminar lo que vaya despues del punto.
 
-#Transformación de datos columnas 4. Columna Type en origen. Cambiar nombre de columna por TypeofAttack. Cambiar Nulos por str Invalid.
+
+
+#Transformación de datos columnas 4. Columna Type en origen. Cambiar nombre de columna por TypeofAttack. Cambiar Unkowns por str Invalid.
 
 #Transformación de datos columnas 5. Columna Country en origen. Cambiar Nulos por Unknown. Transformar unnamed column por SeaOcean. Dejar solo paises y transformar SeaOcean for Unknown.
 
@@ -65,3 +93,10 @@ limpiar_2
 
 #Transformación de datos columnas 17. Columna pdf en origen. Limpiar nulos.
 
+#Transformación de datos columnas 18. Columnas href y href formula. IGUALES. Dejar href y reusar href formula para otro uso. Comprobar los nulos de estas columnas especialmente.
+
+#Transformación de datos columnas 20. Columnas Case Number.1 y Case Number.2 en origen. Iguales y redundantes respecto a columnas anteriores (Fecha). No aportan nada nuevo pueden ser reutilizadas ambas.
+
+#Transformación de datos columnas 22. Columnas original order en origen. Dtype Float64 cambiar a str. Eliminar lo que vaya despues del punto. Ofrece index original, relativo orden cronológico de casos (No exacto). Eliminar nulos.
+
+#Transformación de datos columnas 23. Averiguar que es el Bool?. Una de las columnas se puede reusar.
