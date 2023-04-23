@@ -31,6 +31,7 @@ limpiar_2
 
 #Cambio de nombre de columnas en origen por todo minúscula sin espacios.
 shark_df.columns = shark_df.columns.str.lower().str.replace(' ', '')
+
 shark_df.columns
 
 # Cambio el tipo de dato de las columnas year y originalorder a string.
@@ -43,29 +44,46 @@ shark_df.fillna(value="Unknown", inplace=True)
 
 #Check for nulls and nan in the dataframe.
 check_nulls = shark_df.isnull().sum()
+
 check_nans = shark_df.isna().sum()
 
 #Transformación de datos columnas 1. Columna Case Number en origen. Cambiar columna entera a indice.
+
 # Cambia valores en columna casenumber por indice. 
 shark_df["casenumber"] = range(1, len(shark_df) + 1)
+
 # Establece columna casenumber como indice.
 shark_df.set_index("casenumber", inplace=True)
 
-#Transformación de datos columnas 2. Columna Date en origen. Cambiar tipo formato por fecha y las que no valen por "Incomplete date"
+#Transformación de datos columnas 2. Columna Date en origen. Cambiar tipo formato por fecha y las que no valen por "Incomplete date".
+
 #Cambiar dtype: Object a dtype: datetime64[ns] y aislar los valores que tengan un formato diferente.
 shark_df["date"] = pd.to_datetime(shark_df["date"], errors="coerce")
+
 conteo_nat = shark_df["date"].isna().sum() #844 valores que voy a convertir en "Invalid"
+
 #Cambiar Valores NaT por la string Invalid.
 shark_df["date"] = shark_df["date"].fillna("Invalid")
+
 conteo_invalid = shark_df["date"].value_counts()["Invalid"]
+
 #Quitar ceros de datetime.
 shark_df.loc[shark_df["date"] != "Invalid", "date"] = shark_df.loc[shark_df["date"] != "Invalid", "date"].apply(lambda x: x.strftime("%Y-%m-%d"))
 
 #Transformación de datos columnas 3. Columna Year en origen. Eliminar lo que vaya despues del punto.
 
+#Eliminar lo que va despues del punto.
+shark_df["year"] = shark_df["year"].str.split(".").str[0]
 
+#Reemplazar 0 por Unkown.
+shark_df["year"] = shark_df["year"].replace("0", "Unknown")
+
+count_Unknown_year = shark_df["year"].value_counts()["Unknown"] #Cuenta los valores Unknown en columna.
 
 #Transformación de datos columnas 4. Columna Type en origen. Cambiar nombre de columna por TypeofAttack. Cambiar Unkowns por str Invalid.
+
+#Cambiar nombre de columna
+
 
 #Transformación de datos columnas 5. Columna Country en origen. Cambiar Nulos por Unknown. Transformar unnamed column por SeaOcean. Dejar solo paises y transformar SeaOcean for Unknown.
 
