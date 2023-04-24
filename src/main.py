@@ -5,12 +5,12 @@ import numpy as np
 import chardet
 
 #Decodificacion del archivo csv.
-with open("/home/guille/w2-project_pandas/data/attacks.csv", "rb") as f:
+with open("attacks.csv", "rb") as f:
     result = chardet.detect(f.read())
     encoding = result['encoding']
 
 #Importar archivo csv.
-shark_df = pd.read_csv("/home/guille/w2-project_pandas/data/attacks.csv", encoding=encoding)
+shark_df = pd.read_csv("attacks.csv", encoding=encoding)
 shark_df.shape
 
 #Printear DataFrame para localizar anomalias en filas.
@@ -234,3 +234,6 @@ shark_df.fillna(value="Unknown", inplace=True)
 #Transformación de datos columnas 23. Averiguar que es el Bool?. Una de las columnas se puede reusar.
 #unnamed:22 ----- region
 #unnamed:23 ----- injuryoutcome
+
+#Export clean file.
+shark_df.to_csv('attacks_clean.csv', index=False)
