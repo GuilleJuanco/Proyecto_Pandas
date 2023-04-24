@@ -134,19 +134,41 @@ shark_df["region"] = shark_df["location"].apply(lambda x: x.split(",")[-1])
 #Reemplaza strings con mas de 20 caracteres por "Invalid".
 shark_df["activity"] = shark_df["activity"].apply(lambda x: "Invalid" if len(x) > 20 else x)
 
-#Transformación de datos columnas 9. Columna Name en origen. Si no empieza por Upper eliminar elementos de la string. Cambiar Nulos por Unknown.
+#Transformación de datos columnas 9. Columna Name en origen. Si no empieza por Upper y tamaño de string mayor de 30, cambiar valor por "Invalid". Cambiar Nulos por Unknown.
+
+#Quita espacios por delante y por detras en strings.
+shark_df["name"] = shark_df["name"].str.strip()
 
 #Reemplaza strings de mas de 30 caracteres y strings que no empiezan por mayuscula por "Invalid".
-shark_df["name"] = shark_df["name"].apply(lambda x: "Invalid" if (len(x) > 30 and not x[0].isupper()) else x)
+shark_df["name"] = shark_df["name"].apply(lambda x: "Invalid" if (len(x) > 30 or not x[0].isupper()) else x)
 
 
 #Transformación de datos columnas 10. Columna Sex  en origen. Quitar espacio al final de str en nombre columna. Quitar nulos. Opcional: Cambiar M por Male y F por Female.
 
-#Transformación de datos columnas 11. Columna Age en origen. Cambiar nulos por Unknown. Checkear typos. 
+#Cambio de "F" y "M" por "female" y "male".
+shark_df["sex"] = shark_df["sex"].replace({"F": "Female", "M": "Male"})
+
+#Transformación de datos columnas 11. Columna Age en origen. Cambiar nulos por Unknown.
+
+
 
 #Transformación de datos columnas 12. Columna Injury en origen. Cambiar nulos por Unknown. Si no injury, reemplazar en columna por No Injury.
 
+#Transformar columna "unnamed:23" en "injuryoutcome".
+shark_df.rename(columns={"unnamed:23": "injuryoutcome"}, inplace=True)
+#Añade "survived" a la columna injuryoutcome cuando el string no contiene "FATAL".
+shark_df.loc[~shark_df["injury"].str.contains("fatal", case=False), "injuryoutcome"] = "survived"
+#Añade "no injury" a la columna injuryoutcome cuando el string contiene "no injury".
+shark_df.loc[shark_df["injury"].str.contains("no injury", case=False), "injuryoutcome"] = "no injury"
+#Añade "fatal" a la columna injuryoutcome cuando el string contiene "FATAL".
+shark_df.loc[shark_df["injury"].str.contains("FATAL", case=False), "injuryoutcome"] = "fatal"
+
 #Transformación de datos columnas 13. Columna Fatal en origen. Check todos son N o Y. Cambiar nulos por Unknown.
+
+#Cambio de nombre columna.
+shark_df = shark_df.rename(columns={"fatal(y/n)": "fatal"}) 
+#Cambio de "Y" y "N" por "Fatal" y "Survived".
+shark_df["fatal"] = shark_df["fatal"].replace({"Y": "fatal", "N": "survived"})
 
 #Transformación de datos columnas 14. Columna Time en origen. Quitar nulos y sacar values a lista para tomar decision sobre agrupar horas y periodos.
 
@@ -157,6 +179,8 @@ species_df = pd.read_csv("species.csv")
 #Create a list
 species_raw = species_df["Species"].tolist()
 
+#Añadir size a columna x
+
 #Transformación de datos columnas 16. Columna Investigador or Source. Dividir columna en Investigador y Source si es posible, si no limpiar caracteres que no aportan claridad.
 
 #Transformación de datos columnas 17. Columna pdf en origen. Limpiar nulos.
@@ -165,8 +189,11 @@ species_raw = species_df["Species"].tolist()
 
 #Transformación de datos columnas 20. Columnas Case Number.1 y Case Number.2 en origen. Iguales y redundantes respecto a columnas anteriores (Fecha). No aportan nada nuevo pueden ser reutilizadas ambas.
 
-#Case Number.1 = oceansea
+#casenumber.1 ----- oceansea
+
 
 #Transformación de datos columnas 22. Columnas original order en origen. Dtype Float64 cambiar a str. Eliminar lo que vaya despues del punto. Ofrece index original, relativo orden cronológico de casos (No exacto). Eliminar nulos.
 
 #Transformación de datos columnas 23. Averiguar que es el Bool?. Una de las columnas se puede reusar.
+#unnamed:22 ----- region
+#unnamed:23 ----- injuryoutcome
