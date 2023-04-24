@@ -150,7 +150,7 @@ shark_df["sex"] = shark_df["sex"].replace({"F": "Female", "M": "Male"})
 
 #Transformación de datos columnas 11. Columna Age en origen. Cambiar nulos por Unknown.
 
-
+#Columna sin cambiar aparte de convertir nulos y nan por "Unknown"
 
 #Transformación de datos columnas 12. Columna Injury en origen. Cambiar nulos por Unknown. Si no injury, reemplazar en columna por No Injury.
 
@@ -172,27 +172,64 @@ shark_df["fatal"] = shark_df["fatal"].replace({"Y": "fatal", "N": "survived"})
 
 #Transformación de datos columnas 14. Columna Time en origen. Quitar nulos y sacar values a lista para tomar decision sobre agrupar horas y periodos.
 
+#Cambio de nombre columna hrefformula por timeofday.
+shark_df = shark_df.rename(columns={"hrefformula": "timeofday"})
+
+#Añade el momento del dia a la columna timeofday.
+for i, row in shark_df.iterrows():
+    try:
+        hour = int(row["time"][:2])
+        if 0 <= hour < 6:
+            shark_df.loc[i, "timeofday"] = "night"
+        elif 6 <= hour < 12:
+            shark_df.loc[i, "timeofday"] = "morning"
+        elif 12 <= hour < 18:
+            shark_df.loc[i, "timeofday"] = "afternoon"
+        elif 18 <= hour < 24:
+            shark_df.loc[i, "timeofday"] = "evening"
+        else:#Si el int tiene typo y no entra dentro del rango.
+            shark_df.loc[i, "timeofday"] = "Invalid" 
+    except:
+        #Si la string no se puede convertir a int.
+        shark_df.loc[i, "timeofday"] = "Invalid"
+
 #Transformación de datos columnas 15. Columna Species  en origen. Cambiar vacios y nulos. Sacar tipos a la lista, transformar resto por Unknown. Quitar espacio al final en nombre de columna. Opcional: Tamaño de tiburon a nueva columna "Size".
 
-#Import csv
+#Importa csv
 species_df = pd.read_csv("species.csv")
-#Create a list
+#Crea lista con especies
 species_raw = species_df["Species"].tolist()
+#Mantener nombres que aparecen en lista en columna, de otra forma los valores son "Unknown".
+shark_df["species"] = shark_df["species"].apply(lambda x: x if any(name in x for name in species_raw) else "Unknown")
+#Renombra columna para usar como size
+shark_df = shark_df.rename(columns={"casenumber.2": "sizeshark"})
+#Deja la parte previa a la coma en species y lo que va despues lo añade a sizeshark.
+shark_df["sizeshark"] = shark_df["species"].str.split(",", 1).str[1]
+shark_df["species"] = shark_df["species"].str.split(",", 1).str[0]
 
-#Añadir size a columna x
+#Transformación de datos columnas 16. Columna Investigador or Source. Quitar nulos.
 
-#Transformación de datos columnas 16. Columna Investigador or Source. Dividir columna en Investigador y Source si es posible, si no limpiar caracteres que no aportan claridad.
+#Columna sin cambiar aparte de convertir nulos y nan por "Unknown"
 
-#Transformación de datos columnas 17. Columna pdf en origen. Limpiar nulos.
+#Transformación de datos columnas 17. Columna pdf en origen. Quitar nulos.
+
+#Columna sin cambiar aparte de convertir nulos y nan por "Unknown"
 
 #Transformación de datos columnas 18. Columnas href y href formula. IGUALES. Dejar href y reusar href formula para otro uso. Comprobar los nulos de estas columnas especialmente.
 
-#Transformación de datos columnas 20. Columnas Case Number.1 y Case Number.2 en origen. Iguales y redundantes respecto a columnas anteriores (Fecha). No aportan nada nuevo pueden ser reutilizadas ambas.
+#Columna sin cambiar aparte de convertir nulos y nan por "Unknown"
+
+#Transformación de datos columnas 20. Columnas Case Number.1 y Case Number.2 en origen. Iguales y redundantes respecto a columnas anteriores (Fecha). 
 
 #casenumber.1 ----- oceansea
+#casenumber.2 ----- sizeshark
+#Cambiar NaN por "Unknown".
+shark_df.fillna(value="Unknown", inplace=True)
 
 
-#Transformación de datos columnas 22. Columnas original order en origen. Dtype Float64 cambiar a str. Eliminar lo que vaya despues del punto. Ofrece index original, relativo orden cronológico de casos (No exacto). Eliminar nulos.
+#Transformación de datos columnas 22. Columnas original order en origen. Dtype Float64 cambiar a str. Eliminar nulos.
+
+#Columna sin cambiar aparte de convertir nulos y nan por "Unknown"
 
 #Transformación de datos columnas 23. Averiguar que es el Bool?. Una de las columnas se puede reusar.
 #unnamed:22 ----- region
