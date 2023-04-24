@@ -122,11 +122,23 @@ sea_ocean_rows = shark_df["area"].str.contains('sea|ocean', case=False)
 shark_df.loc[sea_ocean_rows, "seaocean"] = shark_df.loc[sea_ocean_rows, "area"]
 
 
-#Transformación de datos columnas 7. Columna Location en origen. dividir en dos y transformar Unnamed 2 por Region, asignar lo que vaya despues de coma a Region, quitar espacios.
+#Transformación de datos columnas 7. Columna Location en origen. dividir en dos y transformar Unnamed 2 por Region, asignar lo que vaya despues de coma a Region.
+
+#Transformar columna "unnamed:22" en "region".
+shark_df.rename(columns={"unnamed:22": "region"}, inplace=True)
+#Añadir lo que viene despues de la ultima coma a "region".
+shark_df["region"] = shark_df["location"].apply(lambda x: x.split(",")[-1])
 
 #Transformación de datos columnas 8. Columna Activity en origen. Si hay mas de x caracters, cortar string por x patron. Cambiar Nulos por Unknown.
 
+#Reemplaza strings con mas de 20 caracteres por "Invalid".
+shark_df["activity"] = shark_df["activity"].apply(lambda x: "Invalid" if len(x) > 20 else x)
+
 #Transformación de datos columnas 9. Columna Name en origen. Si no empieza por Upper eliminar elementos de la string. Cambiar Nulos por Unknown.
+
+#Reemplaza strings de mas de 30 caracteres y strings que no empiezan por mayuscula por "Invalid".
+shark_df["name"] = shark_df["name"].apply(lambda x: "Invalid" if (len(x) > 30 and not x[0].isupper()) else x)
+
 
 #Transformación de datos columnas 10. Columna Sex  en origen. Quitar espacio al final de str en nombre columna. Quitar nulos. Opcional: Cambiar M por Male y F por Female.
 
