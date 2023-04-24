@@ -101,12 +101,25 @@ countries.append("USA")
 check_en_countries = shark_df['country'].str.strip().str.upper().str.contains('|'.join(countries))
 #Conteo de paises validos en columna
 conteo_countries = check_en_countries.sum()
+#Valores con "sea" u "ocean" en el string a columna renombrada.
+#Transformar columna "casenumber.1" en "seaocean".
+shark_df.rename(columns={"casenumber.1": "seaocean"}, inplace=True)
+#Filtra filas que contienen sea u ocean.
+sea_ocean_rows = shark_df["country"].str.contains('sea|ocean', case=False)
+#Asignar los valores de "country" a "seaocean".
+shark_df.loc[sea_ocean_rows, "seaocean"] = shark_df.loc[sea_ocean_rows, "country"]
 #Cambio de typos o mala escritura del pais por str "Invalid".
 shark_df.loc[~check_en_countries, "country"] = "Invalid"
-#OJO "INVALID" PODRIA SER OCEAN/SEA
+
 
 #Transformación de datos columnas 6. Columna Area en origen. Cambiar nulos por Unknown. Si hay SeaOcean pasar values a columna SeaOcean. Quitar espacios al principio y final str en value.
 
+#Quitar espacios al final y principio de valores.
+shark_df["area"] = shark_df["area"].str.strip()
+#Filtra filas que contienen sea u ocean.
+sea_ocean_rows = shark_df["area"].str.contains('sea|ocean', case=False)
+#Asignar los valores de "area" a "seaocean".
+shark_df.loc[sea_ocean_rows, "seaocean"] = shark_df.loc[sea_ocean_rows, "area"]
 
 
 #Transformación de datos columnas 7. Columna Location en origen. dividir en dos y transformar Unnamed 2 por Region, asignar lo que vaya despues de coma a Region, quitar espacios.
@@ -127,6 +140,11 @@ shark_df.loc[~check_en_countries, "country"] = "Invalid"
 
 #Transformación de datos columnas 15. Columna Species  en origen. Cambiar vacios y nulos. Sacar tipos a la lista, transformar resto por Unknown. Quitar espacio al final en nombre de columna. Opcional: Tamaño de tiburon a nueva columna "Size".
 
+#Import csv
+species_df = pd.read_csv("species.csv")
+#Create a list
+species_raw = species_df["Species"].tolist()
+
 #Transformación de datos columnas 16. Columna Investigador or Source. Dividir columna en Investigador y Source si es posible, si no limpiar caracteres que no aportan claridad.
 
 #Transformación de datos columnas 17. Columna pdf en origen. Limpiar nulos.
@@ -134,6 +152,8 @@ shark_df.loc[~check_en_countries, "country"] = "Invalid"
 #Transformación de datos columnas 18. Columnas href y href formula. IGUALES. Dejar href y reusar href formula para otro uso. Comprobar los nulos de estas columnas especialmente.
 
 #Transformación de datos columnas 20. Columnas Case Number.1 y Case Number.2 en origen. Iguales y redundantes respecto a columnas anteriores (Fecha). No aportan nada nuevo pueden ser reutilizadas ambas.
+
+#Case Number.1 = oceansea
 
 #Transformación de datos columnas 22. Columnas original order en origen. Dtype Float64 cambiar a str. Eliminar lo que vaya despues del punto. Ofrece index original, relativo orden cronológico de casos (No exacto). Eliminar nulos.
 
